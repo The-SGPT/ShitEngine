@@ -14,6 +14,7 @@ class Character extends FlxSprite
 
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = 'bf';
+	public var canIdle:Bool = false;
 
 	public var holdTimer:Float = 0;
 
@@ -498,6 +499,8 @@ class Character extends FlxSprite
 		}
 
 		dance();
+		canIdle = true;
+		immovable = false;
 
 		if (isPlayer)
 		{
@@ -524,7 +527,7 @@ class Character extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
-		if (!curCharacter.startsWith('bf'))
+		if (!isPlayer)
 		{
 			if (animation.curAnim.name.startsWith('sing'))
 			{
@@ -539,6 +542,7 @@ class Character extends FlxSprite
 			{
 				dance();
 				holdTimer = 0;
+				canIdle = true;
 			}
 		}
 

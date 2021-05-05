@@ -20,6 +20,9 @@ class Alphabet extends FlxSpriteGroup
 	// for menu shit
 	public var targetY:Float = 0;
 	public var isMenuItem:Bool = false;
+	public var isTitleItem:Bool = false;
+	public var isCShape:Bool = false;
+	public var isEvenMoreCShape:Bool = false;
 
 	public var text:String = "";
 
@@ -220,12 +223,29 @@ class Alphabet extends FlxSpriteGroup
 
 	override function update(elapsed:Float)
 	{
+		var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
+
 		if (isMenuItem)
 		{
-			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
+			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), 0.16 * (60 / _variables.fps));
+			x = FlxMath.lerp(x, (targetY * 20) + 90, 0.16 * (60 / _variables.fps));
+		}
 
-			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), 0.30);
-			x = FlxMath.lerp(x, (targetY * 20) + 90, 0.30);
+		if (isTitleItem)
+		{
+			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.68), 0.16 * (60 / _variables.fps));
+		}
+
+		if (isCShape)
+		{
+			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), 0.16/(_variables.fps/60));
+
+			x = FlxMath.lerp(x, Math.exp(scaledY * 0.6) * 70 + (FlxG.width * 0.02), 0.16/(_variables.fps/60));
+			if (scaledY < 0)
+				x = FlxMath.lerp(x, Math.exp(scaledY * -0.6) * 70 + (FlxG.width * 0.02), 0.16/(_variables.fps/60));
+
+			if (x > FlxG.width + 30)
+				x = FlxG.width + 30;
 		}
 
 		super.update(elapsed);

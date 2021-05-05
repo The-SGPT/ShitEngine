@@ -26,6 +26,9 @@ class KadeEngineData
 		if (FlxG.save.data.fps == null)
 			FlxG.save.data.fps = false;
 
+		if (FlxG.save.data.mem == null)
+			FlxG.save.data.mem = false;
+
 		if (FlxG.save.data.changedHit == null)
 		{
 			FlxG.save.data.changedHitX = -1;
@@ -37,10 +40,10 @@ class KadeEngineData
 			FlxG.save.data.fpsRain = false;
 
 		if (FlxG.save.data.fpsCap == null)
-			FlxG.save.data.fpsCap = 120;
+			FlxG.save.data.fpsCap = 60;
 
 		if (FlxG.save.data.fpsCap > 285 || FlxG.save.data.fpsCap < 60)
-			FlxG.save.data.fpsCap = 120; // baby proof so you can't hard lock ur copy of kade engine
+			FlxG.save.data.fpsCap = 60; // baby proof so you can't hard lock ur copy of kade engine
 		
 		if (FlxG.save.data.scrollSpeed == null)
 			FlxG.save.data.scrollSpeed = 1;
@@ -49,13 +52,14 @@ class KadeEngineData
 			FlxG.save.data.npsDisplay = false;
 
 		if (FlxG.save.data.frames == null)
-			FlxG.save.data.frames = 10;
+			FlxG.save.data.frames = 20;
 
 		if (FlxG.save.data.accuracyMod == null)
 			FlxG.save.data.accuracyMod = 1;
 
+		// fuck kade engine watermark lul
 		if (FlxG.save.data.watermark == null)
-			FlxG.save.data.watermark = true;
+			FlxG.save.data.watermark = false;
 
 		if (FlxG.save.data.ghost == null)
 			FlxG.save.data.ghost = true;
@@ -66,7 +70,5 @@ class KadeEngineData
 		Conductor.recalculateTimings();
 
 		Main.watermarks = FlxG.save.data.watermark;
-
-		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 	}
 }

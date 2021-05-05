@@ -151,6 +151,46 @@ class LoadingState extends MusicBeatState
 	
 	static function getNextState(target:FlxState, stopMusic = false):FlxState
 	{
+		// fallback so in case stage is null we just load stage
+		if (PlayState.SONG.stage == null)
+		{
+			switch (PlayState.SONG.song.toLowerCase())
+			{
+				case 'tutorial' | 'bopeebo' | 'fresh' | 'dadbattle':
+					PlayState.curStage = "stage";
+				case 'spookeez' | 'south' | 'monster':
+					PlayState.curStage = "spooky";
+				case 'pico' | 'philly' | 'blammed':
+					PlayState.curStage = "philly";
+				case 'satin-panties' | 'high' | 'milf':
+					PlayState.curStage = "limo";
+				case 'cocoa' | 'eggnog':
+					PlayState.curStage = "mall";
+				case 'winter-horrorland':
+					PlayState.curStage = "mall-evil";
+				case 'senpai' | 'roses':
+					PlayState.curStage = "school";
+				case 'thorns':
+					PlayState.curStage = "school-evil";
+				default:
+					PlayState.curStage = "stage";
+			}
+		}
+		// same for gf
+		if (PlayState.SONG.gfVersion == null)
+		{
+			switch (PlayState.curStage)
+			{
+				case 'limo':
+					PlayState.SONG.gfVersion = 'gf-car';
+				case 'mall' | 'mallEvil':
+					PlayState.SONG.gfVersion = 'gf-christmas';
+				case 'school' | 'schoolEvil':
+					PlayState.SONG.gfVersion = 'gf-pixel';
+				default:
+					PlayState.SONG.gfVersion = 'gf';
+			}
+		}
 		Paths.setCurrentLevel("week" + PlayState.storyWeek);
 		#if NO_PRELOAD_ALL
 		var loaded = isSoundLoaded(getSongPath())

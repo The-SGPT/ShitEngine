@@ -424,12 +424,14 @@ class ModchartState
 	
 				trace(Lua_helper.add_callback(lua,"setRenderedNoteScale", function(scale:Float, id:Int) {
 					PlayState.instance.notes.members[id].modifiedByLua = true;
-					PlayState.instance.notes.members[id].setGraphicSize(Std.int(PlayState.instance.notes.members[id].width * scale));
+					PlayState.instance.notes.members[id].scale.set(scale, scale); 
+					PlayState.instance.notes.members[id].updateHitbox();
 				}));
 
-				trace(Lua_helper.add_callback(lua,"setRenderedNoteScale", function(scaleX:Int, scaleY:Int, id:Int) {
+				trace(Lua_helper.add_callback(lua,"setRenderedNoteScaleXY", function(scaleX:Int, scaleY:Int, id:Int) {
 					PlayState.instance.notes.members[id].modifiedByLua = true;
-					PlayState.instance.notes.members[id].setGraphicSize(scaleX,scaleY);
+					PlayState.instance.notes.members[id].scale.set(scaleX, scaleY); 
+					PlayState.instance.notes.members[id].updateHitbox();
 				}));
 
 				trace(Lua_helper.add_callback(lua,"getRenderedNoteWidth", function(id:Int) {
@@ -459,9 +461,19 @@ class ModchartState
 				}));
 	
 				trace(Lua_helper.add_callback(lua,"setActorScale", function(scale:Float,id:String) {
-					getActorByName(id).setGraphicSize(Std.int(getActorByName(id).width * scale));
+					getActorByName(id).scale.set(scale, scale); 
+					getActorByName(id).updateHitbox();
 				}));
 	
+				trace(Lua_helper.add_callback(lua,"setActorScaleX", function(scale:Float,id:String) {
+					getActorByName(id).scale.set(scale, getActorByName(id).scale.y); 
+					getActorByName(id).updateHitbox();
+				}));
+
+				trace(Lua_helper.add_callback(lua,"setActorScaleY", function(scale:Float,id:String) {
+					getActorByName(id).scale.set(getActorByName(id).scale.x, scale); 
+					getActorByName(id).updateHitbox();
+				}));
 	
 				trace(Lua_helper.add_callback(lua,"getActorWidth", function (id:String) {
 					return getActorByName(id).width;

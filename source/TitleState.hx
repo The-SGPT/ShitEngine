@@ -1,5 +1,6 @@
 package;
 
+import flixel.effects.FlxFlicker;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -23,6 +24,7 @@ import flixel.util.FlxTimer;
 import io.newgrounds.NG;
 import lime.app.Application;
 import openfl.Assets;
+import lime.system.System;
 
 #if windows
 import Discord.DiscordClient;
@@ -47,6 +49,11 @@ class TitleState extends MusicBeatState
 	var curWacky:Array<String> = [];
 
 	var wackyImage:FlxSprite;
+
+	var huh:Alphabet;
+	var huhItems:Array<String> = ["play", "exit"];
+	var huhGrp:FlxTypedGroup<Alphabet>;
+	var curSelected:Int = 0;
 
 	override public function create():Void
 	{
@@ -76,8 +83,6 @@ class TitleState extends MusicBeatState
 		#end
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
-
-		// DEBUG BULLSHIT
 
 		super.create();
 
@@ -163,6 +168,23 @@ class TitleState extends MusicBeatState
 		// bg.updateHitbox();
 		add(bg);
 
+		huhGrp = new FlxTypedGroup<Alphabet>();
+
+		for (i in 0...huhItems.length)
+		{
+			var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, huhItems[i], true, false);
+			controlLabel.isTitleItem = true;
+			controlLabel.targetY = i;
+			controlLabel.screenCenter(X);
+			controlLabel.alpha = 0;
+			controlLabel.ID = i;
+			huhGrp.add(controlLabel);
+			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
+		}
+
+		// DEBUG BULLSHIT
+		changeSelection();
+
 		logoBl = new FlxSprite(-150, -100);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
 		logoBl.antialiasing = true;
@@ -179,6 +201,7 @@ class TitleState extends MusicBeatState
 		gfDance.antialiasing = true;
 		add(gfDance);
 		add(logoBl);
+		add(huhGrp);
 
 		titleText = new FlxSprite(100, FlxG.height * 0.8);
 		titleText.frames = Paths.getSparrowAtlas('titleEnter');
@@ -222,7 +245,7 @@ class TitleState extends MusicBeatState
 
 		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
 
-		FlxG.mouse.visible = false;
+		// FlxG.mouse.visible = false; why not
 
 		if (initialized)
 			skipIntro();
@@ -248,6 +271,7 @@ class TitleState extends MusicBeatState
 	}
 
 	var transitioning:Bool = false;
+	var canSelect:Bool = false;
 
 	override function update(elapsed:Float)
 	{
@@ -295,44 +319,69 @@ class TitleState extends MusicBeatState
 				NGio.unlockMedal(61034);
 			#end
 
-			titleText.animation.play('press');
+			trace('asshole');
 
+			// new FlxTimer().start(0.76, function(tmr:FlxTimer){
+			// 	canSelect = true;
+			// });
+			// huhGrp.forEach(function(alph:Alphabet){
+			// 	FlxTween.tween(alph, { alpha: 1 }, 0.76, { ease: FlxEase.circOut });
+			titleText.animation.play('press');
+			transitioning = true;
 			FlxG.camera.flash(FlxColor.WHITE, 1);
 			FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
-
-			transitioning = true;
-			// FlxG.sound.music.stop();
-
-			new FlxTimer().start(2, function(tmr:FlxTimer)
-			{
-
-				// Get current version of Kade Engine
-
-				var http = new haxe.Http("https://raw.githubusercontent.com/KadeDev/Kade-Engine/master/version.downloadMe");
-
-				http.onData = function (data:String) {
-				  
-				  	if (!MainMenuState.kadeEngineVer.contains(data.trim()) && !OutdatedSubState.leftState && MainMenuState.nightly == "")
-					{
-						trace('outdated lmao! ' + data.trim() + ' != ' + MainMenuState.kadeEngineVer);
-						OutdatedSubState.needVer = data;
-						FlxG.switchState(new OutdatedSubState());
-					}
-					else
-					{
-						FlxG.switchState(new MainMenuState());
-					}
-				}
-				
-				http.onError = function (error) {
-				  trace('error: $error');
-				  FlxG.switchState(new MainMenuState()); // fail but we go anyway
-				}
-				
-				http.request();
-
+			// });
+			new FlxTimer().start(2, function(tmr:FlxTimer){
+				FlxG.switchState(new MainMenuState());
 			});
+			// FlxG.sound.music.stop();
 			// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
+		}
+
+		if (canSelect && !transitioning)
+		{
+			if(FlxG.keys.justPressed.UP)
+				changeSelection(-1);
+			if(FlxG.keys.justPressed.DOWN)
+				changeSelection(1);
+
+			if (controls.ACCEPT)
+			{
+				titleText.animation.play('press');
+				transitioning = true;
+				FlxG.camera.flash(FlxColor.WHITE, 1);
+				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
+				huhGrp.forEach(function(spr:Alphabet)
+					{
+						if (curSelected != spr.ID)
+						{
+							FlxTween.tween(spr, {alpha: 0}, 1.3, {
+								ease: FlxEase.quadOut,
+								onComplete: function(twn:FlxTween)
+								{
+									trace('death');
+								}
+							});
+						}
+						else
+						{
+							FlxFlicker.flicker(spr, 2, 0.06, false, false, function(flick:FlxFlicker)
+							{
+								var daChoice:String = huhItems[curSelected];
+
+								switch (daChoice)
+								{
+									case 'play':
+										FlxG.switchState(new MainMenuState());
+									case 'options':
+										FlxG.switchState(new MainMenuState());
+									case 'exit':
+										System.exit(0);
+								}
+							});
+						}
+					});
+			}
 		}
 
 		if (pressedEnter && !skippedIntro && initialized)
@@ -459,5 +508,37 @@ class TitleState extends MusicBeatState
 			remove(credGroup);
 			skippedIntro = true;
 		}
+	}
+
+	function changeSelection(change:Int = 0)
+	{
+		#if !switch
+		// NGio.logEvent('Fresh');
+		#end
+
+		// NGio.logEvent('Fresh');
+		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+
+		curSelected += change;
+
+		if (curSelected < 0)
+			curSelected = huhItems.length - 1;
+		if (curSelected >= huhItems.length)
+			curSelected = 0;
+
+		var bullShit:Int = 0;
+
+		huhGrp.forEach(function(spr:Alphabet)
+		{
+			if (canSelect)
+			{
+				spr.alpha = 0.6;
+
+				if (spr.ID == curSelected)
+				{
+					spr.alpha = 1;
+				}
+			}
+		});
 	}
 }

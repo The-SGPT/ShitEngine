@@ -812,6 +812,12 @@ class PlayState extends MusicBeatState
 		}
 
 		add(gf);
+		if (FlxG.random.bool(1))
+		{
+			gf.scale.set(2, 2);
+			gf.updateHitbox();
+			gf.x += 300;
+		} // funny
 
 		// Shitty layering but whatev it works LOL
 		if (curStage == 'limo')
@@ -858,7 +864,7 @@ class PlayState extends MusicBeatState
 
 		add(camFollow);
 
-		FlxG.camera.follow(camFollow, LOCKON, 0.04 * (30 / (cast (Lib.current.getChildAt(0), Main)).getFPS()));
+		FlxG.camera.follow(camFollow, LOCKON, 0.04 * (60 /*why 30?????*/ / (cast (Lib.current.getChildAt(0), Main)).getFPS()));
 		// FlxG.camera.setScrollBounds(0, FlxG.width, 0, FlxG.height);
 		FlxG.camera.zoom = defaultCamZoom;
 		FlxG.camera.focusOn(camFollow.getPosition());
@@ -902,6 +908,7 @@ class PlayState extends MusicBeatState
 			'health', 0, 2);
 		healthBar.scrollFactor.set();
 		healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
+		healthBar.numDivisions = 10000;
 		// healthBar
 		add(healthBar);
 
@@ -914,14 +921,14 @@ class PlayState extends MusicBeatState
 		if (FlxG.save.data.downscroll)
 			kadeEngineWatermark.y = FlxG.height * 0.9 + 45;
 
-		scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
+		scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 25, 0, "", 20);
 		if (!FlxG.save.data.accuracyDisplay)
 			scoreTxt.x = healthBarBG.x + healthBarBG.width / 2;
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+		scoreTxt.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+		scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 2.5, 2.5);
 		scoreTxt.scrollFactor.set();
 		if (offsetTesting)
 			scoreTxt.x += 300;
-		add(scoreTxt);
 
 		replayTxt = new FlxText(healthBarBG.x + healthBarBG.width / 2 - 75, healthBarBG.y + (FlxG.save.data.downscroll ? 100 : -100), 0, "REPLAY", 20);
 		replayTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
@@ -938,6 +945,7 @@ class PlayState extends MusicBeatState
 		iconP2 = new HealthIcon(SONG.player2, false);
 		iconP2.y = healthBar.y - (iconP2.height / 2);
 		add(iconP2);
+		add(scoreTxt);
 
 		strumLineNotes.cameras = [camHUD];
 		notes.cameras = [camHUD];
@@ -1745,6 +1753,7 @@ class PlayState extends MusicBeatState
 		super.update(elapsed);
 
 		scoreTxt.text = Ratings.CalculateRanking(songScore,songScoreDef,nps,accuracy);
+		scoreTxt.screenCenter(X);
 		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause)
 		{
 			persistentUpdate = false;
@@ -2205,6 +2214,7 @@ class PlayState extends MusicBeatState
 						#end
 
 						dad.holdTimer = 0;
+						dad.canIdle = false;
 	
 						if (SONG.needsVoices)
 							vocals.volume = 1;
@@ -2255,8 +2265,8 @@ class PlayState extends MusicBeatState
 						{
 							health -= 0.075;
 							vocals.volume = 0;
-							if (theFunne)
-								noteMiss(daNote.noteData, daNote);
+							// if (theFunne)
+							// 	noteMiss(daNote.noteData, daNote);
 						}
 	
 						daNote.active = false;
@@ -2428,7 +2438,7 @@ class PlayState extends MusicBeatState
 					score = -300;
 					combo = 0;
 					misses++;
-					health -= 0.2;
+					health -= 0.08;
 					ss = false;
 					shits++;
 					if (FlxG.save.data.accuracyMod == 0)
@@ -2452,7 +2462,7 @@ class PlayState extends MusicBeatState
 						totalNotesHit += 0.75;
 				case 'sick':
 					if (health < 2)
-						health += 0.1;
+						health += 0.06;
 					if (FlxG.save.data.accuracyMod == 0)
 						totalNotesHit += 1;
 					sicks++;
@@ -2583,9 +2593,9 @@ class PlayState extends MusicBeatState
 			comboSpr.updateHitbox();
 			rating.updateHitbox();
 	
-			currentTimingShown.cameras = [camHUD];
-			comboSpr.cameras = [camHUD];
-			rating.cameras = [camHUD];
+			// currentTimingShown.cameras = [camHUD];
+			// comboSpr.cameras = [camHUD];
+			// rating.cameras = [camHUD]; no
 
 			var seperatedScore:Array<Int> = [];
 	
@@ -2607,7 +2617,7 @@ class PlayState extends MusicBeatState
 				numScore.screenCenter();
 				numScore.x = rating.x + (43 * daLoop) - 50;
 				numScore.y = rating.y + 100;
-				numScore.cameras = [camHUD];
+				// numScore.cameras = [camHUD];
 
 				if (!curStage.startsWith('school'))
 				{
@@ -2770,16 +2780,8 @@ class PlayState extends MusicBeatState
 
 					if (perfectMode)
 						goodNoteHit(possibleNotes[0]);
-					else if (possibleNotes.length > 0 && !dontCheck)
+					else if (possibleNotes.length > 0)
 					{
-						if (!FlxG.save.data.ghost)
-						{
-							for (shit in 0...pressArray.length)
-								{ // if a direction is hit that shouldn't be
-									if (pressArray[shit] && !directionList.contains(shit))
-										noteMiss(shit, null);
-								}
-						}
 						for (coolNote in possibleNotes)
 						{
 							if (pressArray[coolNote.noteData])
@@ -2791,20 +2793,25 @@ class PlayState extends MusicBeatState
 							}
 						}
 					}
-					else if (!FlxG.save.data.ghost)
-						{
-							for (shit in 0...pressArray.length)
-								if (pressArray[shit])
-									noteMiss(shit, null);
-						}
-
-					if (dontCheck && possibleNotes.length > 0 && FlxG.save.data.ghost)
+					else if (_variables.spamPrevention) // prevents spam
 					{
-						if (mashViolations > 4)
+						for (shit in 0...pressArray.length)
+							if (pressArray[shit])
+								noteMiss(shit, null);
+					}
+
+					if (possibleNotes.length > 0)
+					{
+						if (mashViolations > 0 && _variables.spamPrevention || 
+							mashViolations > 10 && !_variables.spamPrevention) // honestly idk anymore
 						{
 							trace('mash violations ' + mashViolations);
 							scoreTxt.color = FlxColor.RED;
-							noteMiss(0,null);
+							for (shit in 0...pressArray.length)
+								{ // if a direction is hit that shouldn't be
+									if (pressArray[shit])
+										noteMiss(shit, null);
+								}
 						}
 						else
 							mashViolations++;
@@ -3221,12 +3228,6 @@ class PlayState extends MusicBeatState
 			// Commented out until a reason to bring this back arises in the future
 			/* if (SONG.notes[Math.floor(curStep / 16)].mustHitSection)
 				dad.dance(); */
-			
-			if(dad.animation.curAnim.name.startsWith('sing'))
-				if(dad.animation.finished)
-					dad.dance();
-			else
-				dad.dance();
 		}
 		// FlxG.log.add('change bpm' + SONG.notes[Std.int(curStep / 16)].changeBPM);
 		wiggleShit.update(Conductor.crochet);
@@ -3258,6 +3259,14 @@ class PlayState extends MusicBeatState
 		if (!boyfriend.animation.curAnim.name.startsWith("sing"))
 		{
 			boyfriend.playAnim('idle');
+		}
+
+		if (dad.canIdle) // unbreaks the skipping idle issue i think??????
+		{
+			if (curBeat % 1 == 0)
+				dad.dance();
+			else if (dad.curCharacter == 'spooky' && curBeat % 0 == 0)
+				dad.dance();
 		}
 
 		if (curBeat % 8 == 7 && curSong == 'Bopeebo')

@@ -127,8 +127,8 @@ class Ratings
         return 
         (FlxG.save.data.npsDisplay ? "NPS: " + nps + " | " : "") + // NPS Toggle
         "Score:" + (Conductor.safeFrames != 10 ? score + " (" + scoreDef + ")" : "" + score) + // Score
-        " | Combo Breaks:" + PlayState.misses + // Misses/Combo Breaks
+        " | Misses:" + PlayState.misses /*+ // Misses/Combo Breaks
         " | Accuracy:" + HelperFunctions.truncateFloat(accuracy, 2) +  // Accuracy
-        "% | " + GenerateLetterRank(accuracy); // Letter Rank
+        "% | " + GenerateLetterRank(accuracy)*/; // Letter Rank
     }
 }
