@@ -177,7 +177,7 @@ class MainMenuState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		selection1.text = "Downscroll:" + (FlxG.save.data.downscroll ? " ON" : " OFF") + " (L)";
-		selection2.text = "\nOffset: " + FlxG.save.data.offset + " (Q AND E)";
+		selection2.text = "\nOffset: " + _variables.noteOffset + " (Q AND E)";
 		selection3.text = "\n\nS Frames: " + FlxG.save.data.frames + " (R AND Y)";
 		if (FlxG.sound.music.volume < 0.8)
 		{
@@ -221,14 +221,14 @@ class MainMenuState extends MusicBeatState
 
 			if (FlxG.keys.justPressed.E)
 			{
-				FlxG.save.data.offset++;
-				FlxG.save.flush();
+				_variables.noteOffset++;
+				Settings.Save();
 			}
 
 			if (FlxG.keys.justPressed.Q)
 			{
-				FlxG.save.data.offset--;
-				FlxG.save.flush();
+				_variables.noteOffset--;
+				Settings.Save();
 			}
 
 			if (FlxG.keys.justPressed.Y)

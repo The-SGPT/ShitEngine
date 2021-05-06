@@ -44,7 +44,7 @@ If you are planning to build for Windows, you also need to install **Visual Stud
 -   MSVC v141 - VS 2017 C++ x64/x86 build tools
 -   MSVC v140 - VS 2015 C++ build tools (v14.00)
 
-This will install about 22 GB of crap, but is necessary to build for Windows.
+This will install about 22 GB of crap, but is necessary to build for Windows. (fucking microsoft)
 
 ### macOS-only dependencies (these are required for building on macOS at all, including html5.)
 If you are running macOS, you'll need to install Xcode. You can download it from the macOS App Store or from the [Xcode website](https://developer.apple.com/xcode/).

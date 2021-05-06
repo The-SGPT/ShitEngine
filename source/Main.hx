@@ -94,7 +94,9 @@ class Main extends Sprite
 		Settings.Load();
 		toggleFPS(_variables.fpsCounter);
 		toggleMem(_variables.memory);
-		flixel.addons.studio.FlxStudio.create();
+		#if STUDIO
+		flixel.addons.studio.FlxStudio.create(); // easier offset management
+		#end
 		watermarks = false; //fuck off kade
 		#end
 	}

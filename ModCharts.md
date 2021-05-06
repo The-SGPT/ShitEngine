@@ -160,12 +160,12 @@ To get started every sprite has an id, and there are some id's that are accessib
 
 These premade id's are the following:
 
-| Sprite Id  |                  Value                   |
-| :--------: | :--------------------------------------: |
-|    0-7     |         Represents Receptor 0-7          |
-| boyfriend  | Represents the Boyfriend Actor (player1) |
-|    dad     |    Represents the Dad Actor (player2)    |
-| girlfriend |     Represents the Girlfriend Actor      |
+|        Sprite Id         |                  Value                   |
+| :----------------------: | :--------------------------------------: |
+|          0-7             |         Represents Receptor 0-7          |
+| boyfriend / bf / player1 | Represents the Boyfriend Actor (player1) |
+|      dad / player2       |    Represents the Dad Actor (player2)    |
+|    girlfriend / gf       |     Represents the Girlfriend Actor      |
 
 
 
@@ -379,11 +379,11 @@ Set's the angle for the sprite id
 
 Set's the scale for the sprite id
 
-##### setActorScaleX(float x, string/int id) **Currently broken**
+##### setActorScaleX(float x, string/int id) 
 
 Set's the scale x for the sprite id
 
-##### setActorScaleY(float y, string/int id) **Currently broken**
+##### setActorScaleY(float y, string/int id) 
 
 Set's the scale y for the sprite id
 

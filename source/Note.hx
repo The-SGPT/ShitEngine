@@ -172,11 +172,11 @@ class Note extends FlxSprite
 					case 3:
 						prevNote.animation.play('redhold');
 				}
-
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
-				prevNote.updateHitbox();
 				// prevNote.setGraphicSize();
 			}
+
+			scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
+			updateHitbox();
 		}
 	}
 
