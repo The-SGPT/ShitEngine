@@ -1,5 +1,6 @@
 package;
 
+import haxe.xml.Access;
 import haxe.Exception;
 import openfl.geom.Matrix;
 import openfl.display.BitmapData;
@@ -29,6 +30,7 @@ import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.effects.FlxTrail;
 import flixel.addons.effects.FlxTrailArea;
 import flixel.addons.effects.chainable.FlxEffectSprite;
+import flixel.addons.effects.FlxSkewedSprite;
 import flixel.addons.effects.chainable.FlxWaveEffect;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.graphics.atlas.FlxAtlas;
@@ -116,8 +118,8 @@ class PlayState extends MusicBeatState
 
 	private static var prevCamFollow:FlxObject;
 
-	public static var strumLineNotes:FlxTypedGroup<FlxSprite> = null;
-	public static var playerStrums:FlxTypedGroup<FlxSprite> = null;
+	public static var strumLineNotes:FlxTypedGroup<FlxSkewedSprite> = null;
+	public static var playerStrums:FlxTypedGroup<FlxSkewedSprite> = null;
 
 	private var camZooming:Bool = false;
 	private var curSong:String = "";
@@ -849,11 +851,11 @@ class PlayState extends MusicBeatState
 		if (FlxG.save.data.downscroll)
 			strumLine.y = FlxG.height - 150;
 
-		strumLineNotes = new FlxTypedGroup<FlxSprite>();
+		strumLineNotes = new FlxTypedGroup<FlxSkewedSprite>();
 		add(strumLineNotes);
 		add(grpNoteSplashes);
 
-		playerStrums = new FlxTypedGroup<FlxSprite>();
+		playerStrums = new FlxTypedGroup<FlxSkewedSprite>();
 
 		// startCountdown();
 
@@ -1457,7 +1459,7 @@ class PlayState extends MusicBeatState
 		for (i in 0...4)
 		{
 			// FlxG.log.add(i);
-			var babyArrow:FlxSprite = new FlxSprite(0, strumLine.y);
+			var babyArrow:FlxSkewedSprite = new FlxSkewedSprite(0, strumLine.y);
 
 			switch (SONG.noteStyle)
 			{
@@ -2148,7 +2150,7 @@ class PlayState extends MusicBeatState
 						daNote.visible = true;
 						daNote.active = true;
 					}
-					
+
 					if (!daNote.modifiedByLua)
 					{
 						if (FlxG.save.data.downscroll)
@@ -2159,11 +2161,7 @@ class PlayState extends MusicBeatState
 								daNote.y = (strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].y + 0.45 * (Conductor.songPosition - daNote.strumTime) * FlxMath.roundDecimal(FlxG.save.data.scrollSpeed == 1 ? SONG.speed : FlxG.save.data.scrollSpeed, 2));
 							if(daNote.isSustainNote)
 							{
-								// Remember = minus makes notes go up, plus makes them go down
-								if(daNote.animation.curAnim.name.endsWith('end') && daNote.prevNote != null)
-									daNote.y += daNote.prevNote.height;
-								else
-									daNote.y += daNote.height / 2;
+								daNote.y += SONG.speed * 35;
 
 								// If not in botplay, only clip sustain notes when properly hit, botplay gets to clip it everytime
 								if(!FlxG.save.data.botplay)
@@ -2193,7 +2191,7 @@ class PlayState extends MusicBeatState
 								daNote.y = (strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].y - 0.45 * (Conductor.songPosition - daNote.strumTime) * FlxMath.roundDecimal(FlxG.save.data.scrollSpeed == 1 ? SONG.speed : FlxG.save.data.scrollSpeed, 2));
 							if(daNote.isSustainNote)
 							{
-								daNote.y -= daNote.height / 2;
+								daNote.y -= SONG.speed * 35;
 
 								if(!FlxG.save.data.botplay)
 								{
@@ -2267,6 +2265,8 @@ class PlayState extends MusicBeatState
 						if (!daNote.isSustainNote)
 							daNote.angle = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].angle;
 						daNote.alpha = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].alpha;
+						if (daNote.isSustainNote)
+							daNote.alpha -= 0.4;
 					}
 					else if (!daNote.wasGoodHit && !daNote.modifiedByLua)
 					{
@@ -2275,13 +2275,14 @@ class PlayState extends MusicBeatState
 						if (!daNote.isSustainNote)
 							daNote.angle = strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].angle;
 						daNote.alpha = strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].alpha;
+						if (daNote.isSustainNote)
+							daNote.alpha -= 0.4;
 					}
-					
-					
 
 					if (daNote.isSustainNote)
-						daNote.x += daNote.width / 2 + 17;
-					
+					{
+						daNote.x += daNote.width / 2 + 20;
+					}
 
 					//trace(daNote.y);
 					// WIP interpolation shit? Need to fix the pause issue
@@ -2289,7 +2290,7 @@ class PlayState extends MusicBeatState
 	
 					if ((daNote.mustPress && daNote.tooLate && !FlxG.save.data.downscroll || daNote.mustPress && daNote.tooLate && FlxG.save.data.downscroll) && daNote.mustPress)
 					{
-						if (daNote.isSustainNote && daNote.wasGoodHit)
+						if ((daNote.isSustainNote || daNote.animation.curAnim.name.endsWith('end')) && daNote.wasGoodHit)
 						{
 							daNote.kill();
 							notes.remove(daNote, true);
@@ -2847,10 +2848,10 @@ class PlayState extends MusicBeatState
 
 		notes.forEachAlive(function(daNote:Note)
 		{
-			if(FlxG.save.data.downscroll && daNote.y > strumLine.y ||
-			!FlxG.save.data.downscroll && daNote.y < strumLine.y)
+			if(FlxG.save.data.downscroll && daNote.y > playerStrums.members[daNote.noteData].y ||
+			!FlxG.save.data.downscroll && daNote.y < playerStrums.members[daNote.noteData].y /*I TRIED OK :((*/)
 			{
-					// Force good note hit regardless if it's too late to hit it or not as a fail safe
+				// Force good note hit regardless if it's too late to hit it or not as a fail safe
 				if(FlxG.save.data.botplay && daNote.canBeHit && daNote.mustPress ||
 				FlxG.save.data.botplay && daNote.tooLate && daNote.mustPress)
 				{
@@ -2868,7 +2869,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		playerStrums.forEach(function(spr:FlxSprite)
+		playerStrums.forEach(function(spr:FlxSkewedSprite)
 		{
 			if (pressArray[spr.ID] && spr.animation.curAnim.name != 'confirm')
 				spr.animation.play('pressed');
@@ -3080,7 +3081,7 @@ class PlayState extends MusicBeatState
 
 
 					if (!loadRep)
-						playerStrums.forEach(function(spr:FlxSprite)
+						playerStrums.forEach(function(spr:FlxSkewedSprite)
 						{
 							if (Math.abs(note.noteData) == spr.ID)
 							{

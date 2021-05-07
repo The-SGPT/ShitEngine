@@ -13,7 +13,7 @@ import PlayState;
 
 using StringTools;
 
-class Note extends FlxSprite
+class Note extends FlxSkewedSprite // let us make it a skewed sprite
 {
 	public var strumTime:Float = 0;
 
@@ -62,7 +62,7 @@ class Note extends FlxSprite
 		switch (PlayState.SONG.noteStyle)
 		{
 			case 'pixel':
-				loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels','week6'), true, 17, 17);
+				loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels', 'week6'), true, 17, 17);
 
 				animation.add('greenScroll', [6]);
 				animation.add('redScroll', [7]);
@@ -71,7 +71,7 @@ class Note extends FlxSprite
 
 				if (isSustainNote)
 				{
-					loadGraphic(Paths.image('weeb/pixelUI/arrowEnds','week6'), true, 7, 6);
+					loadGraphic(Paths.image('weeb/pixelUI/arrowEnds', 'week6'), true, 7, 6);
 
 					animation.add('purpleholdend', [4]);
 					animation.add('greenholdend', [6]);
@@ -86,6 +86,7 @@ class Note extends FlxSprite
 
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				updateHitbox();
+
 			default:
 				frames = Paths.getSparrowAtlas('NOTE_assets');
 
@@ -142,14 +143,14 @@ class Note extends FlxSprite
 
 			switch (noteData)
 			{
+				case 0:
+					animation.play('purpleholdend');
+				case 1:
+					animation.play('blueholdend');
 				case 2:
 					animation.play('greenholdend');
 				case 3:
 					animation.play('redholdend');
-				case 1:
-					animation.play('blueholdend');
-				case 0:
-					animation.play('purpleholdend');
 			}
 
 			updateHitbox();
@@ -173,10 +174,9 @@ class Note extends FlxSprite
 						prevNote.animation.play('redhold');
 				}
 				// prevNote.setGraphicSize();
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
+				prevNote.updateHitbox();
 			}
-
-			scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
-			updateHitbox();
 		}
 	}
 

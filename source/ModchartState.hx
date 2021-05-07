@@ -552,6 +552,12 @@ class ModchartState
 			getActorByName(id).updateHitbox();
 		}));
 
+		trace(Lua_helper.add_callback(lua, "setActorSkewX", function(skew:Float, id:String)
+		{
+			getActorByName(id).skew.x = skew;
+			getActorByName(id).updateHitbox();
+		}));
+
 		trace(Lua_helper.add_callback(lua, "setActorScaleY", function(scale:Float, id:String)
 		{
 			getActorByName(id).scale.set(getActorByName(id).scale.x, scale);
@@ -974,6 +980,10 @@ class ModchartState
 			setVar("defaultStrum" + i + "X", Math.floor(member.x));
 			// setVar("strum" + i + "Y", Math.floor(member.y));
 			setVar("defaultStrum" + i + "Y", Math.floor(member.y));
+			// setVar("strum" + i + "X", Math.floor(member.x));
+			setVar("defaultStrum" + i + "ScaleX", Math.floor(member.scale.x));
+			// setVar("strum" + i + "Y", Math.floor(member.y));
+			setVar("defaultStrum" + i + "ScaleY", Math.floor(member.scale.y));
 			// setVar("strum" + i + "Angle", Math.floor(member.angle));
 			setVar("defaultStrum" + i + "Angle", Math.floor(member.angle));
 			trace("Adding strum" + i);
