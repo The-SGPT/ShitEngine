@@ -1,6 +1,7 @@
 // this file is for modchart things, this is to declutter playstate.hx
 
 // Lua
+import Math;
 #if windows
 import flixel.tweens.FlxEase;
 import openfl.filters.ShaderFilter;
@@ -17,7 +18,6 @@ import llua.LuaL;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
-
 class ModchartState 
 {
 	//public static var shaders:Array<LuaShader> = null;
@@ -497,16 +497,59 @@ class ModchartState
 
 		trace(Lua_helper.add_callback(lua, "setRenderedNoteScale", function(scale:Float, id:Int)
 		{
-			PlayState.instance.notes.members[id].modifiedByLua = true;
+			// PlayState.instance.notes.members[id].modifiedByLua = true;
 			PlayState.instance.notes.members[id].scale.set(scale, scale);
 			PlayState.instance.notes.members[id].updateHitbox();
 		}));
 
-		trace(Lua_helper.add_callback(lua, "setRenderedNoteScaleXY", function(scaleX:Int, scaleY:Int, id:Int)
+		trace(Lua_helper.add_callback(lua, "setRenderedNoteScaleXY", function(scaleX:Float, scaleY:Float, id:Int)
 		{
-			PlayState.instance.notes.members[id].modifiedByLua = true;
+			// PlayState.instance.notes.members[id].modifiedByLua = true;
 			PlayState.instance.notes.members[id].scale.set(scaleX, scaleY);
 			PlayState.instance.notes.members[id].updateHitbox();
+		}));
+
+		trace(Lua_helper.add_callback(lua, "setRenderedNoteSkewX", function(skew:Float, id:Int)
+		{
+			// PlayState.instance.notes.members[id].modifiedByLua = true;
+			PlayState.instance.notes.members[id].skew.x = skew;
+			PlayState.instance.notes.members[id].updateHitbox();
+		}));
+		
+		trace(Lua_helper.add_callback(lua, "setNoteSkewX", function(skew:Float, id:Int)
+		{
+			// PlayState.instance.notes.members[id].modifiedByLua = true;
+			PlayState.instance.notes.forEach(function(daNote:Note){
+				if (!daNote.isSustainNote)
+				{
+					daNote.skew.x = skew;
+					daNote.updateHitbox();
+				}
+			});
+		}));
+
+		trace(Lua_helper.add_callback(lua, "setNoteScale", function(scale:Float, id:Int)
+		{
+			// PlayState.instance.notes.members[id].modifiedByLua = true;
+			PlayState.instance.notes.forEach(function(daNote:Note){
+				if (!daNote.isSustainNote)
+				{
+					daNote.scale.set(scale, scale);
+					daNote.updateHitbox();
+				}
+			});
+		}));
+
+		trace(Lua_helper.add_callback(lua, "setNoteScaleXY", function(scaleX:Float, scaleY:Float, id:Int)
+		{
+			// PlayState.instance.notes.members[id].modifiedByLua = true;
+			PlayState.instance.notes.forEach(function(daNote:Note){
+				if (!daNote.isSustainNote)
+				{
+					daNote.scale.set(scaleX, scaleY);
+					daNote.updateHitbox();
+				}
+			});
 		}));
 
 		trace(Lua_helper.add_callback(lua, "getRenderedNoteWidth", function(id:Int)
@@ -634,6 +677,23 @@ class ModchartState
 			}});
 		});
 
+		Lua_helper.add_callback(lua, "tweenScaleX", function(a:String, b:Float, c:Float)
+		{
+			getActorByName(a).scale.set(lerp(getActorByName(a).scale.x, b, c/(_variables.fps/60)), getActorByName(a).scale.y);
+		});
+
+		Lua_helper.add_callback(lua, "tweenScaleY", function(a:String, b:Float, c:Float)
+		{
+			getActorByName(a).scale.set(getActorByName(a).scale.x, lerp(getActorByName(a).scale.y, b, c/(_variables.fps/60)));
+		});
+
+		Lua_helper.add_callback(lua, "tweenNoteScaleX", function(b:Float, c:Float)
+		{
+			PlayState.instance.notes.forEach(function(daNote:Note){
+				daNote.scale.set(lerp(daNote.scale.x, b, c/(_variables.fps/60)), daNote.scale.y);
+			});
+		});
+
 		Lua_helper.add_callback(lua, "tweenHudPos", function(toX:Int, toY:Int, time:Float, onComplete:String)
 		{
 			FlxTween.tween(PlayState.instance.camHUD, {x: toX, y: toY}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween)
@@ -703,6 +763,17 @@ class ModchartState
 		Lua_helper.add_callback(lua, "tweenAngle", function(id:String, toAngle:Int, time:Float, onComplete:String)
 		{
 			FlxTween.tween(getActorByName(id), {angle: toAngle}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween)
+			{
+				if (onComplete != '' && onComplete != null)
+				{
+					callLua(onComplete, [id]);
+				}
+			}});
+		});
+
+		Lua_helper.add_callback(lua, "tweenScaleX", function(id:String, toAngle:Int, time:Float, onComplete:String)
+		{
+			FlxTween.tween(getActorByName(id), {angle: toAngle}, time, {ease: FlxEase.cubeOut, onComplete: function(flxTween:FlxTween)
 			{
 				if (onComplete != '' && onComplete != null)
 				{
@@ -952,6 +1023,16 @@ class ModchartState
 				}
 			}});
 		});
+
+		Lua_helper.add_callback(lua, "lerp", function(a:Float, b:Float, ratio:Float)
+		{
+			return a + ratio * (b - a);
+		});
+
+		Lua_helper.add_callback(lua, "mod", function(a:Float, b:Float)
+		{
+			return a - (Math.floor(a/b)*b);
+		});
 		// forgot and accidentally commit to master branch
 		// shader
 
@@ -1004,5 +1085,10 @@ class ModchartState
     {
         return new ModchartState();
     }
+
+	public static inline function lerp(a:Float, b:Float, ratio:Float):Float
+	{
+		return a + ratio * (b - a);
+	}
 }
 #end

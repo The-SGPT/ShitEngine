@@ -2097,36 +2097,36 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (curSong == 'Tutorial')
-		{
-			// help
-			var defaultStrum:Float = 0;
-			var defaultStrum2:Float = 0;
-			var defaultStrum3:Float = 0;
-			var defaultStrum4:Float = 0;
-			if (curStep == 117)
-			{
-				defaultStrum = playerStrums.members[0].x;
-				defaultStrum2 = playerStrums.members[1].x;
-				defaultStrum3 = playerStrums.members[2].x;
-				defaultStrum4 = playerStrums.members[3].x;
-			}
+		// if (curSong == 'Tutorial')
+		// {
+		// 	// help
+		// 	var defaultStrum:Float = 0;
+		// 	var defaultStrum2:Float = 0;
+		// 	var defaultStrum3:Float = 0;
+		// 	var defaultStrum4:Float = 0;
+		// 	if (curStep == 117)
+		// 	{
+		// 		defaultStrum = playerStrums.members[0].x;
+		// 		defaultStrum2 = playerStrums.members[1].x;
+		// 		defaultStrum3 = playerStrums.members[2].x;
+		// 		defaultStrum4 = playerStrums.members[3].x;
+		// 	}
 				
-			// HARDCODE COS LUA DOING SHIT ON ME RN
-			if (curStep >= 116 && curStep <= 371)
-			{
-				var ohohohoFast = (Conductor.songPosition / 1000)*(SONG.bpm/2);
-				for (i in 0...playerStrums.members.length)
-					playerStrums.members[i].x = playerStrums.members[i].x + (FlxG.width / 8) * Math.sin((ohohohoFast + i*0) * 3.14);
-			}
-			else if (curStep == 372)
-			{
-				playerStrums.members[0].x = defaultStrum;
-				playerStrums.members[1].x = defaultStrum2;
-				playerStrums.members[2].x = defaultStrum3;
-				playerStrums.members[3].x = defaultStrum4;
-			}
-		}
+		// 	// HARDCODE COS LUA DOING SHIT ON ME RN
+		// 	if (curStep >= 116 && curStep <= 371)
+		// 	{
+		// 		var ohohohoFast = (Conductor.songPosition / 1000)*(SONG.bpm/2);
+		// 		for (i in 0...playerStrums.members.length)
+		// 			playerStrums.members[i].x = playerStrums.members[i].x + (FlxG.width / 8) * Math.sin((ohohohoFast + i*0) * 3.14);
+		// 	}
+		// 	else if (curStep == 372)
+		// 	{
+		// 		playerStrums.members[0].x = defaultStrum;
+		// 		playerStrums.members[1].x = defaultStrum2;
+		// 		playerStrums.members[2].x = defaultStrum3;
+		// 		playerStrums.members[3].x = defaultStrum4;
+		// 	}
+		// }
 
 		if (curSong == 'Bopeebo')
 		{
