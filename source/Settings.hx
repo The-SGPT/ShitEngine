@@ -28,6 +28,7 @@ typedef Variables =
     var fpsCounter:Bool;
     var memory:Bool;
     var scroll:String;
+    var loadScreen:Bool;
 }
 
 // THIS IS FOR JSON TYPE IMPORTANT SETTINGS
@@ -62,7 +63,8 @@ class Settings
                 fpsCounter: true,
                 memory: true,
                 //up to do in week 7 update
-                scroll: 'up'
+                scroll: 'up',
+                loadScreen: false
             };
             
             Save();

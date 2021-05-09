@@ -244,9 +244,9 @@ class ModchartState
 		var imgHeight:Float = FlxG.height / data.height;
 		var scale:Float = imgWidth <= imgHeight ? imgWidth : imgHeight;
 
-		// Cap the scale at x1
-		if (scale > 1)
-			scale = 1;
+		// // Cap the scale at x1
+		// if (scale > 1)
+		// 	scale = 1; no
 
 		sprite.makeGraphic(Std.int(data.width * scale),Std.int(data.width * scale),FlxColor.TRANSPARENT);
 
@@ -523,6 +523,11 @@ class ModchartState
 		trace(Lua_helper.add_callback(lua, "setActorX", function(x:Int, id:String)
 		{
 			getActorByName(id).x = x;
+		}));
+
+		trace(Lua_helper.add_callback(lua, "setActorCamera", function(camera:FlxCamera, id:String)
+		{
+			getActorByName(id).cameras = [camera];
 		}));
 
 		trace(Lua_helper.add_callback(lua, "setActorAlpha", function(alpha:Float, id:String)

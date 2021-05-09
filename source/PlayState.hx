@@ -1819,6 +1819,9 @@ class PlayState extends MusicBeatState
 		if (health > 2)
 			health = 2;
 
+		if (health < 0)
+			health = 0;
+
 		if (healthBar.percent < 20)
 			iconP1.animation.curAnim.curFrame = 1;
 		else
@@ -2089,6 +2092,37 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		if (curSong == 'Tutorial')
+		{
+			// help
+			var defaultStrum:Float = 0;
+			var defaultStrum2:Float = 0;
+			var defaultStrum3:Float = 0;
+			var defaultStrum4:Float = 0;
+			if (curStep == 117)
+			{
+				defaultStrum = playerStrums.members[0].x;
+				defaultStrum2 = playerStrums.members[1].x;
+				defaultStrum3 = playerStrums.members[2].x;
+				defaultStrum4 = playerStrums.members[3].x;
+			}
+				
+			// HARDCODE COS LUA DOING SHIT ON ME RN
+			if (curStep >= 116 && curStep <= 371)
+			{
+				var ohohohoFast = (Conductor.songPosition / 1000)*(SONG.bpm/2);
+				for (i in 0...playerStrums.members.length)
+					playerStrums.members[i].x = playerStrums.members[i].x + (FlxG.width / 8) * Math.sin((ohohohoFast + i*0) * 3.14);
+			}
+			else if (curStep == 372)
+			{
+				playerStrums.members[0].x = defaultStrum;
+				playerStrums.members[1].x = defaultStrum2;
+				playerStrums.members[2].x = defaultStrum3;
+				playerStrums.members[3].x = defaultStrum4;
+			}
+		}
+
 		if (curSong == 'Bopeebo')
 		{
 			switch (curBeat)
@@ -2100,7 +2134,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (health <= 0)
+		if (health <= 0 && curSong != 'Tutorial')
 		{
 			boyfriend.stunned = true;
 
@@ -2132,6 +2166,7 @@ class PlayState extends MusicBeatState
 				unspawnNotes.splice(index, 1);
 			}
 		}
+		var setOffset:Bool = false;
 
 		if (generatedMusic)
 			{
@@ -2161,8 +2196,7 @@ class PlayState extends MusicBeatState
 								daNote.y = (strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].y + 0.45 * (Conductor.songPosition - daNote.strumTime) * FlxMath.roundDecimal(FlxG.save.data.scrollSpeed == 1 ? SONG.speed : FlxG.save.data.scrollSpeed, 2));
 							if(daNote.isSustainNote)
 							{
-								daNote.y += SONG.speed * 35;
-
+								daNote.y += SONG.speed * 10;
 								// If not in botplay, only clip sustain notes when properly hit, botplay gets to clip it everytime
 								if(!FlxG.save.data.botplay)
 								{
@@ -2191,8 +2225,7 @@ class PlayState extends MusicBeatState
 								daNote.y = (strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].y - 0.45 * (Conductor.songPosition - daNote.strumTime) * FlxMath.roundDecimal(FlxG.save.data.scrollSpeed == 1 ? SONG.speed : FlxG.save.data.scrollSpeed, 2));
 							if(daNote.isSustainNote)
 							{
-								daNote.y -= SONG.speed * 35;
-
+								daNote.y -= SONG.speed * 10;
 								if(!FlxG.save.data.botplay)
 								{
 									if((!daNote.mustPress || daNote.wasGoodHit || daNote.prevNote.wasGoodHit && !daNote.canBeHit) && daNote.y + daNote.offset.y * daNote.scale.y <= (strumLine.y + Note.swagWidth / 2))
@@ -2443,9 +2476,13 @@ class PlayState extends MusicBeatState
 	var timeShown = 0;
 	var currentTimingShown:FlxText = null;
 
-	private function popUpScore(daNote:Note):Void
+	private function popUpScore(daNote:Note, miss:Bool = false):Void
 		{
-			var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
+			var noteDiff:Float = 0;
+			if (!miss)
+				noteDiff = Math.abs(Conductor.songPosition - daNote.strumTime);
+			else
+				trace('MISSED IDIOT');
 			var wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale);
 			// boyfriend.playAnim('hey');
 			vocals.volume = 1;
@@ -2467,56 +2504,62 @@ class PlayState extends MusicBeatState
 
 			var daRating = daNote.rating;
 
-			switch(daRating)
-			{
-				case 'shit':
-					score = -300;
-					combo = 0;
-					misses++;
-					health -= 0.08;
-					ss = false;
-					shits++;
-					if (FlxG.save.data.accuracyMod == 0)
-						totalNotesHit += 0.25;
-				case 'bad':
-					daRating = 'bad';
-					score = 0;
-					health -= 0.06;
-					ss = false;
-					bads++;
-					if (FlxG.save.data.accuracyMod == 0)
-						totalNotesHit += 0.50;
-				case 'good':
-					daRating = 'good';
-					score = 200;
-					ss = false;
-					goods++;
-					if (health < 2)
-						health += 0.04;
-					if (FlxG.save.data.accuracyMod == 0)
-						totalNotesHit += 0.75;
-				case 'sick':
-					if (health < 2)
-						health += 0.06;
-					if (FlxG.save.data.accuracyMod == 0)
-						totalNotesHit += 1;
-
-					var bruhSplash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-					bruhSplash.cameras = [camHUD];
-					bruhSplash.setupNoteSplash(daNote.noteData, daNote.x, playerStrums.members[daNote.noteData].y);
-					grpNoteSplashes.add(bruhSplash);
-
-					sicks++;
-			}
+				switch(daRating)
+				{
+					case 'shit':
+						score = -300;
+						combo = 0;
+						misses++;
+						health -= 0.08;
+						ss = false;
+						shits++;
+						if (FlxG.save.data.accuracyMod == 0)
+							totalNotesHit += 0.25;
+					case 'bad':
+						daRating = 'bad';
+						score = 0;
+						health -= 0.06;
+						ss = false;
+						bads++;
+						if (FlxG.save.data.accuracyMod == 0)
+							totalNotesHit += 0.50;
+					case 'good':
+						daRating = 'good';
+						score = 200;
+						ss = false;
+						goods++;
+						if (health < 2)
+							health += 0.04;
+						if (FlxG.save.data.accuracyMod == 0)
+							totalNotesHit += 0.75;
+					case 'sick':
+						if (health < 2)
+							health += 0.06;
+						if (FlxG.save.data.accuracyMod == 0)
+							totalNotesHit += 1;
+	
+						var bruhSplash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
+						bruhSplash.cameras = [camHUD];
+						bruhSplash.setupNoteSplash(daNote.noteData, daNote.x, playerStrums.members[daNote.noteData].y);
+						grpNoteSplashes.add(bruhSplash);
+	
+						sicks++;
+				}
 
 			// trace('Wife accuracy loss: ' + wife + ' | Rating: ' + daRating + ' | Score: ' + score + ' | Weight: ' + (1 - wife));
 
 			if (daRating != 'shit' || daRating != 'bad')
 				{
 	
-	
-			songScore += Math.round(score);
-			songScoreDef += Math.round(ConvertScore.convertScore(noteDiff));
+			if (!miss)
+			{
+				songScore += Math.round(score);
+				songScoreDef += Math.round(ConvertScore.convertScore(noteDiff));
+			}
+
+			if (miss)
+				combo = 0;
+			
 	
 			/* if (combo > 60)
 					daRating = 'sick';
@@ -2642,7 +2685,12 @@ class PlayState extends MusicBeatState
 
 			if (comboSplit.length == 2)
 				seperatedScore.push(0); // make sure theres a 0 in front or it looks weird lol!
-
+			if (comboSplit.length == 1)
+			{
+				seperatedScore.push(0); // make sure theres a double 0 in front or it looks weird lol!
+				seperatedScore.push(0);
+			}
+				
 			for(i in 0...comboSplit.length)
 			{
 				var str:String = comboSplit[i];
@@ -2673,7 +2721,7 @@ class PlayState extends MusicBeatState
 				numScore.velocity.y -= FlxG.random.int(140, 160);
 				numScore.velocity.x = FlxG.random.float(-5, 5);
 	
-				if (combo >= 10 || combo == 0)
+				if (combo >= 1 || combo == 0)
 					add(numScore);
 	
 				FlxTween.tween(numScore, {alpha: 0}, 0.2, {
@@ -2828,22 +2876,6 @@ class PlayState extends MusicBeatState
 					if (pressArray[shit])
 						noteMiss(shit, null);
 			}
-
-			if (possibleNotes.length > 0)
-			{
-				if (mashViolations > 0 && _variables.spamPrevention || mashViolations > 10 && !_variables.spamPrevention) // honestly idk anymore
-				{
-					trace('mash violations ' + mashViolations);
-					scoreTxt.color = FlxColor.RED;
-					for (shit in 0...pressArray.length)
-					{ // if a direction is hit that shouldn't be
-						if (pressArray[shit])
-							noteMiss(shit, null);
-					}
-				}
-				else
-					mashViolations++;
-			}
 		}
 
 		notes.forEachAlive(function(daNote:Note)
@@ -2889,6 +2921,7 @@ class PlayState extends MusicBeatState
 
 	function noteMiss(direction:Int = 1, daNote:Note):Void
 	{
+		combo = 0;
 		if (!boyfriend.stunned)
 		{
 			health -= 0.04;
@@ -2896,7 +2929,6 @@ class PlayState extends MusicBeatState
 			{
 				gf.playAnim('sad');
 			}
-			combo = 0;
 			misses++;
 
 			//var noteDiff:Float = Math.abs(daNote.strumTime - Conductor.songPosition);

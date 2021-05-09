@@ -12,6 +12,8 @@ import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
+import flixel.util.FlxTimer;
+import flixel.ui.FlxBar;
 
 import haxe.io.Path;
 
@@ -26,6 +28,9 @@ class LoadingState extends MusicBeatState
 	var logo:FlxSprite;
 	var gfDance:FlxSprite;
 	var danceLeft = false;
+	var bar:FlxBar;
+	var ass2:Float = 0.00;
+	public static var ass:String = "";
 	
 	function new(target:FlxState, stopMusic:Bool)
 	{
@@ -52,6 +57,29 @@ class LoadingState extends MusicBeatState
 		gfDance.antialiasing = true;
 		add(gfDance);
 		add(logo);
+
+		bar = new FlxBar(0, FlxG.height - 100, HORIZONTAL_OUTSIDE_IN, 1000, 10, this, ass2);
+		bar.createFilledBar(0xffffff00, 0xFFFF16D2);
+		bar.numDivisions = 10000;
+		bar.screenCenter(X);
+		add(bar);
+		Conductor.changeBPM(102);
+
+		if (PlayState.isStoryMode)
+		{
+			new FlxTimer().start(1.5, function(no:FlxTimer){
+				for (i in 0...PlayState.storyPlaylist.length)
+				{
+					FlxG.sound.cache(Paths.inst(PlayState.storyPlaylist[i]));
+					FlxG.sound.cache(Paths.voices(PlayState.storyPlaylist[i]));
+					FlxG.log.add('SUCCESSFULLY CACHED ' + PlayState.storyPlaylist[i].toUpperCase());
+				}
+			});
+		}
+		else
+		{
+			FlxG.sound.cache(Paths.voices(ass));
+		}
 		
 		initSongsManifest().onComplete
 		(
@@ -106,6 +134,7 @@ class LoadingState extends MusicBeatState
 	
 	override function beatHit()
 	{
+		ass2 += 0.50;
 		super.beatHit();
 		
 		logo.animation.play('bump');
@@ -191,6 +220,25 @@ class LoadingState extends MusicBeatState
 					PlayState.SONG.gfVersion = 'gf';
 			}
 		}
+		// cache songs
+		if (!_variables.loadScreen)
+		{
+			if (PlayState.isStoryMode)
+			{
+				new FlxTimer().start(0.5, function(no:FlxTimer){
+					for (i in 0...PlayState.storyPlaylist.length)
+					{
+						FlxG.sound.cache(Paths.inst(PlayState.storyPlaylist[i]));
+						FlxG.sound.cache(Paths.voices(PlayState.storyPlaylist[i]));
+						FlxG.log.add('SUCCESSFULLY CACHED ' + PlayState.storyPlaylist[i].toUpperCase());
+					}
+				});
+			}
+			else
+			{
+				FlxG.sound.cache(Paths.voices(ass));
+			}
+		}
 		Paths.setCurrentLevel("week" + PlayState.storyWeek);
 		#if NO_PRELOAD_ALL
 		var loaded = isSoundLoaded(getSongPath())
@@ -203,7 +251,10 @@ class LoadingState extends MusicBeatState
 		if (stopMusic && FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 		
-		return target;
+		if (_variables.loadScreen)
+			return new LoadingState(target, stopMusic);
+		else
+			return target;
 	}
 	
 	#if NO_PRELOAD_ALL
@@ -217,6 +268,26 @@ class LoadingState extends MusicBeatState
 		return Assets.getLibrary(library) != null;
 	}
 	#end
+
+	function helYeah() // GONNA USE THIS LATER ;)
+	{
+		logo = new FlxSprite(-150, -100);
+		logo.frames = Paths.getSparrowAtlas('logoBumpin');
+		logo.antialiasing = true;
+		logo.animation.addByPrefix('bump', 'logo bumpin', 24);
+		logo.animation.play('bump');
+		logo.updateHitbox();
+		// logoBl.screenCenter();
+		// logoBl.color = FlxColor.BLACK;
+
+		gfDance = new FlxSprite(FlxG.width * 0.4, FlxG.height * 0.07);
+		gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
+		gfDance.animation.addByIndices('danceLeft', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
+		gfDance.animation.addByIndices('danceRight', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
+		gfDance.antialiasing = true;
+		add(gfDance);
+		add(logo);
+	}
 	
 	override function destroy()
 	{
