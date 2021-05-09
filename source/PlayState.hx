@@ -220,7 +220,9 @@ class PlayState extends MusicBeatState
 	{
 		instance = this;
 		
-
+		if (FlxG.save.data.fpsCap > 290)
+			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(800);
+		
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
@@ -1672,6 +1674,9 @@ class PlayState extends MusicBeatState
 		perfectMode = false;
 		#end
 
+		if (FlxG.save.data.botplay && FlxG.keys.justPressed.ONE)
+			camHUD.visible = !camHUD.visible;
+
 		#if windows
 		if (executeModchart && luaModchart != null && songStarted)
 		{
@@ -2362,6 +2367,9 @@ class PlayState extends MusicBeatState
 	{
 		if (!loadRep)
 			rep.SaveReplay();
+
+		if (FlxG.save.data.fpsCap > 290)
+			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(290);
 
 		#if windows
 		if (luaModchart != null)
@@ -3337,6 +3345,12 @@ class PlayState extends MusicBeatState
 		{
 			boyfriend.playAnim('idle');
 		}
+		
+		/*
+		if (!dad.animation.curAnim.name.startsWith("sing"))
+		{
+			dad.dance();
+		} i made this but i made it better below */
 
 		if (dad.canIdle) // unbreaks the skipping idle issue i think??????
 		{
