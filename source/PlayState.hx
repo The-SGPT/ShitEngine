@@ -1668,6 +1668,8 @@ class PlayState extends MusicBeatState
 	private var paused:Bool = false;
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
+	var nps:Int = 0;
+	var maxNPS:Int = 0;
 
 	public static var songRate = 1.5;
 
@@ -1732,21 +1734,6 @@ class PlayState extends MusicBeatState
 		}
 
 		#end
-
-		if (currentFrames == FlxG.save.data.fpsCap)
-		{
-			for(i in 0...notesHitArray.length)
-			{
-				var cock:Date = notesHitArray[i];
-				if (cock != null)
-					if (cock.getTime() + 2000 < Date.now().getTime())
-						notesHitArray.remove(cock);
-			}
-			nps = Math.floor(notesHitArray.length / 2);
-			currentFrames = 0;
-		}
-		else
-			currentFrames++;
 
 		if (FlxG.keys.justPressed.NINE)
 		{
@@ -3083,8 +3070,6 @@ class PlayState extends MusicBeatState
 				}
 		}
 
-		var nps:Int = 0;
-
 		function goodNoteHit(note:Note, resetMashViolation = true):Void
 			{
 
@@ -3095,8 +3080,10 @@ class PlayState extends MusicBeatState
 
 				note.rating = Ratings.CalculateRating(noteDiff);
 
+				// add newest note to front of notesHitArray
+				// the oldest notes are at the end and are removed first
 				if (!note.isSustainNote)
-					notesHitArray.push(Date.now());
+					notesHitArray.unshift(Date.now());
 
 				if (!resetMashViolation && mashViolations >= 1)
 					mashViolations--;

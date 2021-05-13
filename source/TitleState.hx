@@ -320,13 +320,14 @@ class TitleState extends MusicBeatState
 			#end
 
 			trace('asshole');
+			if (FlxG.save.data.flashing)
+				titleText.animation.play('press');
 
 			// new FlxTimer().start(0.76, function(tmr:FlxTimer){
 			// 	canSelect = true;
 			// });
 			// huhGrp.forEach(function(alph:Alphabet){
 			// 	FlxTween.tween(alph, { alpha: 1 }, 0.76, { ease: FlxEase.circOut });
-			titleText.animation.play('press');
 			transitioning = true;
 			FlxG.camera.flash(FlxColor.WHITE, 1);
 			FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
