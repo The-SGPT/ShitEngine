@@ -366,6 +366,11 @@ class ModchartState
 			PlayState.instance.camHUD.angle = x;
 		}));
 
+		trace(Lua_helper.add_callback(lua, "addHudAngle", function(x:Float)
+		{
+			PlayState.instance.camHUD.angle += x;
+		}));
+
 		trace(Lua_helper.add_callback(lua, "setHudPosition", function(x:Int, y:Int)
 		{
 			PlayState.instance.camHUD.x = x;
@@ -519,37 +524,37 @@ class ModchartState
 		trace(Lua_helper.add_callback(lua, "setNoteSkewX", function(skew:Float, id:Int)
 		{
 			// PlayState.instance.notes.members[id].modifiedByLua = true;
-			PlayState.instance.notes.forEach(function(daNote:Note){
-				if (!daNote.isSustainNote)
-				{
-					daNote.skew.x = skew;
-					daNote.updateHitbox();
-				}
-			});
+			// PlayState.instance.notes.forEach(function(daNote:Note){
+			// 	if (!daNote.isSustainNote)
+			// 	{
+			// 		daNote.skew.x = skew;
+			// 		daNote.updateHitbox();
+			// 	}
+			// });
 		}));
 
 		trace(Lua_helper.add_callback(lua, "setNoteScale", function(scale:Float, id:Int)
 		{
 			// PlayState.instance.notes.members[id].modifiedByLua = true;
-			PlayState.instance.notes.forEach(function(daNote:Note){
-				if (!daNote.isSustainNote)
-				{
-					daNote.scale.set(scale, scale);
-					daNote.updateHitbox();
-				}
-			});
+			// PlayState.instance.notes.forEach(function(daNote:Note){
+			// 	if (!daNote.isSustainNote)
+			// 	{
+			// 		daNote.scale.set(scale, scale);
+			// 		daNote.updateHitbox();
+			// 	}
+			// });
 		}));
 
 		trace(Lua_helper.add_callback(lua, "setNoteScaleXY", function(scaleX:Float, scaleY:Float, id:Int)
 		{
-			// PlayState.instance.notes.members[id].modifiedByLua = true;
-			PlayState.instance.notes.forEach(function(daNote:Note){
-				if (!daNote.isSustainNote)
-				{
-					daNote.scale.set(scaleX, scaleY);
-					daNote.updateHitbox();
-				}
-			});
+			// // PlayState.instance.notes.members[id].modifiedByLua = true;
+			// PlayState.instance.notes.forEach(function(daNote:Note){
+			// 	if (!daNote.isSustainNote)
+			// 	{
+			// 		daNote.scale.set(scaleX, scaleY);
+			// 		daNote.updateHitbox();
+			// 	}
+			// });
 		}));
 
 		trace(Lua_helper.add_callback(lua, "getRenderedNoteWidth", function(id:Int)
@@ -603,6 +608,12 @@ class ModchartState
 		trace(Lua_helper.add_callback(lua, "setActorSkewX", function(skew:Float, id:String)
 		{
 			getActorByName(id).skew.x = skew;
+			getActorByName(id).updateHitbox();
+		}));
+
+		trace(Lua_helper.add_callback(lua, "setActorSkewY", function(skew:Float, id:String)
+		{
+			getActorByName(id).skew.y = skew;
 			getActorByName(id).updateHitbox();
 		}));
 

@@ -87,6 +87,28 @@ class Note extends FlxSkewedSprite // let us make it a skewed sprite
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				updateHitbox();
 
+			case 'notitg':
+				frames = Paths.getSparrowAtlas('experimental/itg/NOTE_assets', 'shared');
+
+				animation.addByPrefix('greenScroll', 'green', 24, true);
+				animation.addByPrefix('redScroll', 'red', 24, true);
+				animation.addByPrefix('blueScroll', 'blue', 24, true);
+				animation.addByPrefix('purpleScroll', 'purple', 24, true);
+
+				animation.addByPrefix('purpleholdend', 'pruple end hold');
+				animation.addByPrefix('greenholdend', 'green hold end');
+				animation.addByPrefix('redholdend', 'red hold end');
+				animation.addByPrefix('blueholdend', 'blue hold end');
+
+				animation.addByPrefix('purplehold', 'purple hold piece');
+				animation.addByPrefix('greenhold', 'green hold piece');
+				animation.addByPrefix('redhold', 'red hold piece');
+				animation.addByPrefix('bluehold', 'blue hold piece');
+
+				setGraphicSize(Std.int(width * 0.7));
+				updateHitbox();
+				antialiasing = true;
+
 			default:
 				frames = Paths.getSparrowAtlas('NOTE_assets');
 

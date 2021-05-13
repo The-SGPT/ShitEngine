@@ -146,6 +146,7 @@ class PlayState extends MusicBeatState
 	private var iconP1:HealthIcon;
 	private var iconP2:HealthIcon;
 	public var camHUD:FlxCamera;
+	public var camSustain:FlxCamera;
 	private var camGame:FlxCamera;
 
 	public static var offsetTesting:Bool = false;
@@ -209,6 +210,7 @@ class PlayState extends MusicBeatState
 	private var botPlayState:FlxText;
 
 	private var executeModchart = false;
+	var asshgole:Bool = false;
 
 	// API stuff
 	
@@ -292,6 +294,8 @@ class PlayState extends MusicBeatState
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
+		camSustain = new FlxCamera();
+		camSustain.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD);
@@ -311,7 +315,7 @@ class PlayState extends MusicBeatState
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 
-		trace('INFORMATION ABOUT WHAT U PLAYIN WIT:\nFRAMES: ' + Conductor.safeFrames + '\nZONE: ' + Conductor.safeZoneOffset + '\nTS: ' + Conductor.timeScale + '\nBotPlay : ' + FlxG.save.data.botplay);
+		trace('INFORMATION ABOUT WHAT U PLAYIN WIT:\nFRAMES: ' + Conductor.safeFrames + '\nZONE: ' + Conductor.safeZoneOffset + '\nTS: ' + Conductor.timeScale + '\nBotPlay : ' + asshgole);
 		
 		switch (SONG.song.toLowerCase())
 		{
@@ -954,8 +958,6 @@ class PlayState extends MusicBeatState
 		botPlayState = new FlxText(healthBarBG.x + healthBarBG.width / 2 - 75, healthBarBG.y + (FlxG.save.data.downscroll ? 100 : -100), 0, "BOTPLAY", 20);
 		botPlayState.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 		botPlayState.scrollFactor.set();
-		
-		if(FlxG.save.data.botplay) add(botPlayState);
 
 		iconP1 = new HealthIcon(SONG.player1, true);
 		iconP1.y = healthBar.y - (iconP1.height / 2);
@@ -1423,6 +1425,7 @@ class PlayState extends MusicBeatState
 					unspawnNotes.push(sustainNote);
 
 					sustainNote.mustPress = gottaHitNote;
+					sustainNote.cameras = [camHUD, camSustain]; // assghole
 
 					if (sustainNote.mustPress)
 					{
@@ -1500,8 +1503,8 @@ class PlayState extends MusicBeatState
 							babyArrow.animation.add('confirm', [15, 19], 24, false);
 					}
 				
-				case 'normal':
-					babyArrow.frames = Paths.getSparrowAtlas('NOTE_assets');
+				case 'notitg':
+					babyArrow.frames = Paths.getSparrowAtlas('experimental/itg/NOTE_assets', 'shared');
 					babyArrow.animation.addByPrefix('green', 'arrowUP');
 					babyArrow.animation.addByPrefix('blue', 'arrowDOWN');
 					babyArrow.animation.addByPrefix('purple', 'arrowLEFT');
@@ -1674,9 +1677,6 @@ class PlayState extends MusicBeatState
 		perfectMode = false;
 		#end
 
-		if (FlxG.save.data.botplay && FlxG.keys.justPressed.ONE)
-			camHUD.visible = !camHUD.visible;
-
 		#if windows
 		if (executeModchart && luaModchart != null && songStarted)
 		{
@@ -1755,6 +1755,9 @@ class PlayState extends MusicBeatState
 			else
 				iconP1.animation.play('bf-old');
 		}
+
+		if (FlxG.keys.justPressed.F8)
+			asshgole = !asshgole;
 
 		switch (curStage)
 		{
@@ -2203,7 +2206,7 @@ class PlayState extends MusicBeatState
 							{
 								daNote.y += SONG.speed * 10;
 								// If not in botplay, only clip sustain notes when properly hit, botplay gets to clip it everytime
-								if(!FlxG.save.data.botplay)
+								if(!asshgole)
 								{
 									if((!daNote.mustPress || daNote.wasGoodHit || daNote.prevNote.wasGoodHit && !daNote.canBeHit) && daNote.y - daNote.offset.y * daNote.scale.y + daNote.height >= (strumLine.y + Note.swagWidth / 2))
 									{
@@ -2231,7 +2234,7 @@ class PlayState extends MusicBeatState
 							if(daNote.isSustainNote)
 							{
 								daNote.y -= SONG.speed * 10;
-								if(!FlxG.save.data.botplay)
+								if(!asshgole)
 								{
 									if((!daNote.mustPress || daNote.wasGoodHit || daNote.prevNote.wasGoodHit && !daNote.canBeHit) && daNote.y + daNote.offset.y * daNote.scale.y <= (strumLine.y + Note.swagWidth / 2))
 									{
@@ -2303,7 +2306,12 @@ class PlayState extends MusicBeatState
 						if (!daNote.isSustainNote)
 							daNote.angle = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].angle;
 						daNote.alpha = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].alpha;
-						if (daNote.isSustainNote)
+						if (!daNote.isSustainNote) {
+							daNote.skew.x = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].skew.x;
+							daNote.skew.y = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].skew.y;
+						}
+						daNote.scale.x = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].scale.x;
+						if (daNote.isSustainNote && SONG.noteStyle != 'notitg')
 							daNote.alpha -= 0.4;
 					}
 					else if (!daNote.wasGoodHit && !daNote.modifiedByLua)
@@ -2313,7 +2321,12 @@ class PlayState extends MusicBeatState
 						if (!daNote.isSustainNote)
 							daNote.angle = strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].angle;
 						daNote.alpha = strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].alpha;
-						if (daNote.isSustainNote)
+						if (!daNote.isSustainNote) {
+							daNote.skew.x = strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].skew.x;
+							daNote.skew.y = strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].skew.y;
+						}
+						daNote.scale.x = strumLineNotes.members[Math.floor(Math.abs(daNote.noteData))].scale.x;
+						if (daNote.isSustainNote && SONG.noteStyle != 'notitg')
 							daNote.alpha -= 0.4;
 					}
 
@@ -2601,7 +2614,7 @@ class PlayState extends MusicBeatState
 			rating.velocity.x -= FlxG.random.int(0, 10);
 			
 			var msTiming = HelperFunctions.truncateFloat(noteDiff, 3);
-			if(FlxG.save.data.botplay) msTiming = 0;							   
+			if(asshgole) msTiming = 0;							   
 
 			if (currentTimingShown != null)
 				remove(currentTimingShown);
@@ -2647,7 +2660,7 @@ class PlayState extends MusicBeatState
 			if (currentTimingShown.alpha != 1)
 				currentTimingShown.alpha = 1;
 
-			if(!FlxG.save.data.botplay) add(currentTimingShown);
+			if(!asshgole) add(currentTimingShown);
 			
 			var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'combo' + pixelShitPart2));
 			comboSpr.screenCenter();
@@ -2664,7 +2677,7 @@ class PlayState extends MusicBeatState
 	
 			comboSpr.velocity.x += FlxG.random.int(1, 10);
 			currentTimingShown.velocity.x += comboSpr.velocity.x;
-			if(!FlxG.save.data.botplay) add(rating);
+			add(rating);
 	
 			if (!curStage.startsWith('school'))
 			{
@@ -2892,8 +2905,8 @@ class PlayState extends MusicBeatState
 			!FlxG.save.data.downscroll && daNote.y < playerStrums.members[daNote.noteData].y /*I TRIED OK :((*/)
 			{
 				// Force good note hit regardless if it's too late to hit it or not as a fail safe
-				if(FlxG.save.data.botplay && daNote.canBeHit && daNote.mustPress ||
-				FlxG.save.data.botplay && daNote.tooLate && daNote.mustPress)
+				if(asshgole && daNote.canBeHit && daNote.mustPress ||
+				asshgole && daNote.tooLate && daNote.mustPress)
 				{
 					goodNoteHit(daNote);
 					boyfriend.holdTimer = daNote.sustainLength;
